@@ -433,7 +433,6 @@ def app_calculator():
         st.write("---")
         if st.button("🔄 НАЧАТЬ ВСЁ СНАЧАЛА (Сброс)", type="secondary"):
             restart_app()
-    main()
        
 
 
