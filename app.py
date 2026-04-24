@@ -484,7 +484,7 @@ def app_todo():
             padding: 25px;
             margin: 15px 0;
             box-shadow: 0 8px 32px rgba(0, 255, 204, 0.2), inset 0 1px 0 rgba(255,255,255,0.1);
-            color: #e0e0ff;
+            color: #ffffff;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .fact-card:hover {
