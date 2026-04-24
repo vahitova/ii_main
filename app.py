@@ -1346,7 +1346,141 @@ def app_todo():
        
 
 def app_notes():
-    pass
+    import streamlit as st
+    from PIL import Image, ImageDraw
+    import os
+    import time
+    
+    # ================= НАСТРОЙКИ ИГРЫ =================
+    ROUNDS = [
+        {
+            "image_a": "cat.jpg",
+            "image_b": "cat2.jpg",
+            "fake_is": "b",
+            "clue": "У котика на картинке справа неестественно изогнут хвост!"
+        },
+        {
+            "image_a": "kod2.jpg",
+            "image_b": "kod.jpg",
+            "fake_is": "a",
+            "clue": "Посмотри на левую картинку: там перепутан порядок букв!"
+        },
+        {
+            "image_a": "dom.jpg",
+            "image_b": "dom1.jpg",
+            "fake_is": "b",
+            "clue": "Отражение несуществующих людей."
+        }
+    ]
+    # ===================================================
+    
+    def get_image(path):
+        """Загружает картинку или рисует заглушку, если файла нет"""
+        if os.path.exists(path):
+            return Image.open(path)
+        else:
+            # Создаем синюю заглушку, если картинка не найдена
+            img = Image.new('RGB', (350, 350), color=(52, 152, 219))
+            d = ImageDraw.Draw(img)
+            d.text((50, 150), f"НЕТ ФАЙЛА:\n{path}", fill=(255, 255, 255))
+            return img
+    
+    def main():
+        # Настройка страницы
+        st.set_page_config(page_title="Школа Детективов", page_icon="🕵️", layout="centered")
+    
+        # Инициализация переменных состояния (Session State)
+        if 'score' not in st.session_state:
+            st.session_state.score = 0
+            st.session_state.current_round = 0
+            st.session_state.answered = False
+            st.session_state.round_start_time = time.time()
+            st.session_state.feedback_type = None
+            st.session_state.feedback_text = ""
+    
+        st.title("Школа Детективов: Найди Дипфейк! 🕵️‍♂️")
+    
+        # --- ПРОВЕРКА КОНЦА ИГРЫ ---
+        if st.session_state.current_round >= len(ROUNDS):
+            st.header("Игра окончена! 🎉")
+            st.write(f"### Ты собрал {st.session_state.score} из {len(ROUNDS)} звезд! ⭐")
+            st.write("Отличная детективная работа!")
+            
+            if st.button("Играть заново 🔄", use_container_width=True):
+                st.session_state.clear() # Очищаем состояние
+                st.rerun()               # Перезапускаем приложение
+            return
+    
+        # --- ТЕКУЩИЙ РАУНД ---
+        round_data = ROUNDS[st.session_state.current_round]
+    
+        # Верхняя панель: Счет и Таймер
+        col_score, col_timer = st.columns(2)
+        with col_score:
+            st.write(f"### Звезды: {st.session_state.score} " + "⭐" * st.session_state.score)
+        with col_timer:
+            st.write("### ⏳ У тебя 15 секунд!")
+            st.caption("Постарайся ответить быстро, иначе время выйдет!")
+    
+        st.write("Где здесь Дипфейк? Кликни на кнопку под подделкой!")
+    
+        # Картинки и кнопки
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.image(get_image(round_data["image_a"]), caption="Картинка А", use_container_width=True)
+            btn_a = st.button("Это фейк! (А)", disabled=st.session_state.answered, key="btn_a", use_container_width=True)
+    
+        with col2:
+            st.image(get_image(round_data["image_b"]), caption="Картинка Б", use_container_width=True)
+            btn_b = st.button("Это фейк! (Б)", disabled=st.session_state.answered, key="btn_b", use_container_width=True)
+    
+        # --- ОБРАБОТКА ОТВЕТА ---
+        if not st.session_state.answered:
+            choice = None
+            if btn_a: choice = "a"
+            if btn_b: choice = "b"
+    
+            if choice:
+                # Считаем, сколько времени прошло с начала раунда
+                elapsed = time.time() - st.session_state.round_start_time
+                
+                if elapsed > 15:
+                    # Время вышло
+                    st.session_state.feedback_type = "warning"
+                    st.session_state.feedback_text = f"⏰ Ты не успел! Прошло {int(elapsed)} сек. Это была картинка '{round_data['fake_is'].upper()}'.\n\n**Улика:** {round_data['clue']}"
+                elif choice == round_data["fake_is"]:
+                    # Правильный ответ
+                    st.session_state.score += 1
+                    st.session_state.feedback_type = "success"
+                    st.session_state.feedback_text = f"✅ ПРАВИЛЬНО! Это фейк!\n\n**Улика:** {round_data['clue']}"
+                else:
+                    # Неправильный ответ
+                    st.session_state.feedback_type = "error"
+                    st.session_state.feedback_text = f"❌ ОШИБКА! Это настоящее фото.\n\n**Улика фейка:** {round_data['clue']}"
+                
+                st.session_state.answered = True
+                st.rerun() # Мгновенно обновляем интерфейс для показа результата
+    
+        # --- ПОКАЗ РЕЗУЛЬТАТА И КНОПКА "СЛЕДУЮЩИЙ РАУНД" ---
+        if st.session_state.answered:
+            # Показываем плашку нужного цвета
+            if st.session_state.feedback_type == "success":
+                st.success(st.session_state.feedback_text)
+            elif st.session_state.feedback_type == "error":
+                st.error(st.session_state.feedback_text)
+            else:
+                st.warning(st.session_state.feedback_text)
+    
+            if st.button("Следующий раунд ➡️", use_container_width=True):
+                st.session_state.current_round += 1
+                st.session_state.answered = False
+                st.session_state.round_start_time = time.time() # Сбрасываем таймер
+                st.rerun()
+    
+    
+    main()
+
     
 
 def app_weather():
