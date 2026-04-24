@@ -1349,6 +1349,7 @@ if __name__ == "__main__":
    
 
 def app_notes():
+    pass
     
 
 def app_weather():
@@ -2737,7 +2738,7 @@ else:
         {"id": "calculator", "icon": "🧮", "name": "Дерево решений", "desc": "Как работает ИИ", "color": "#4CAF50"},
         {"id": "todo", "icon": "✅", "name": "ИИ-патруль", "desc": "Как обманывает ИИ", "color": "#2196F3"},
         {"id": "notes", "icon": "📝", "name": "Фото", "desc": "Найди дипфейк", "color": "#FF9800"},
-        {"id": "weather", "icon": "🌤️", "name": "Промпты", "desc": "Научись писать промпты "color": "#9C27B0"},
+        {"id": "weather", "icon": "🌤️", "name": "Промпты", "desc": "Научись писать промпты", "color": "#9C27B0"},
     ]
     
     # Рисуем дорогу
