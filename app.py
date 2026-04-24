@@ -467,7 +467,7 @@ def app_todo():
     <style>
         /* Основной фон и шрифты */
         .stApp {
-            background: linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 50%, #0d0d3d 100%);
+            background: #ffffff;
         }
         
         /* Крупные шрифты для проектора */
